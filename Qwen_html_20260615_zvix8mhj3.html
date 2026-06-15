@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Теннисный корт КП — Онлайн запись</title>
+    <style>
+        :root {
+            --primary: #2e7d32;
+            --primary-light: #4caf50;
+            --primary-dark: #1b5e20;
+            --accent: #ff9800;
+            --bg: #f5f7f5;
+            --white: #ffffff;
+            --text: #2c3e2c;
+            --text-light: #6b7c6b;
+            --booked: #e53935;
+            --selected: #ff9800;
+            --slot-bg: #e8f5e9;
+            --shadow: 0 4px 20px rgba(0,0,0,0.06);
+            --shadow-lg: 0 8px 40px rgba(0,0,0,0.12);
+            --radius: 16px;
+            --radius-sm: 12px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== HEADER ===== */
+        header {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: -40%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 50%;
+        }
+
+        .header-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .logo-icon { font-size: 42px; }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .header-subtitle {
+            font-size: 1.05rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .header-info {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .header-info-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* ===== MAIN ===== */
+        main {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 25px 20px 60px;
+            flex: 1;
+            width: 100%;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ===== WEEK NAVIGATION ===== */
+        .week-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .week-nav-btn {
+            background: var(--white);
+            border: 2px solid #e0e8e0;
+            border-radius: var(--radius-sm);
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--primary);
+            transition: all 0.2s;
+        }
+
+        .week-nav-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .week-nav-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .week-label {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text);
+            text-align: center;
+        }
+
+        /* ===== DAYS TABS ===== */
+        .days-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .days-tabs::-webkit-scrollbar { display: none; }
+
+        .day-tab {
+            flex-shrink: 0;
+            background: var(--white);
+            border: 2px solid #e0e8e0;
+            border-radius: var(--radius);
+            padding: 12px 16px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.25s;
+            min-width: 80px;
+        }
+
+        .day-tab:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        .day-tab.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(46,125,50,0.3);
+        }
+
+        .day-tab.today .day-name { color: var(--primary); }
+        .day-tab.active .day-name { color: #ffd54f; }
+
+        .day-tab .day-name {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-light);
+            margin-bottom: 4px;
+        }
+
+        .day-tab .day-num {
+            font-size: 1.4rem;
+            font-weight: 800;
+        }
+
+        .day-tab .day-month {
+            font-size: 0.7rem;
+            color: var(--text-light);
+            margin-top: 2px;
+        }
+        .day-tab.active .day-month { color: rgba(255,255,255,0.8); }
+
+        /* ===== COURT CARD ===== */
+        .court-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .court-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .court-header h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .court-type {
+            font-size: 0.8rem;
+            opacity: 0.9;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 10px;
+            border-radius: 50px;
+        }
+
+        .court-body { padding: 20px; }
+
+        /* ===== TIME SLOTS ===== */
+        .slots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 10px;
+        }
+
+        .time-slot {
+            padding: 14px 8px;
+            border-radius: var(--radius-sm);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid #e0e8e0;
+            background: var(--slot-bg);
+        }
+
+        .time-slot .slot-time {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .time-slot .slot-status {
+            font-size: 0.7rem;
+            margin-top: 4px;
+            color: var(--primary-light);
+            font-weight: 600;
+        }
+
+        .time-slot:hover:not(.booked):not(.past) {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(46,125,50,0.15);
+        }
+
+        .time-slot.selected {
+            background: var(--selected);
+            border-color: var(--selected);
+            color: white;
+        }
+        .time-slot.selected .slot-time,
+        .time-slot.selected .slot-status { color: white; }
+
+        .time-slot.booked {
+            background: #ffebee;
+            border-color: #ffcdd2;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .time-slot.booked .slot-time,
+        .time-slot.booked .slot-status { color: var(--booked); }
+
+        .time-slot.past {
+            background: #f5f5f5;
+            border-color: #e0e0e0;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        .time-slot.past .slot-time,
+        .time-slot.past .slot-status { color: #999; }
+
+        /* ===== LEGEND ===== */
+        .legend {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 4px;
+        }
+        .legend-dot.available { background: var(--slot-bg); border: 2px solid #c8e6c9; }
+        .legend-dot.selected { background: var(--selected); }
+        .legend-dot.booked { background: #ffebee; border: 2px solid #ffcdd2; }
+        .legend-dot.past { background: #f5f5f5; border: 2px solid #e0e0e0; }
+
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .modal-overlay.active { display: flex; animation: fadeIn 0.3s ease; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .modal {
+            background: var(--white);
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 450px;
+            box-shadow: var(--shadow-lg);
+            animation: slideUp 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 20px 25px;
+            border-radius: var(--radius) var(--radius) 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 { font-size: 1.2rem; font-weight: 700; }
+
+        .modal-close {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .modal-close:hover { background: rgba(255,255,255,0.3); }
+
+        .modal-body { padding: 25px; }
+
+        .booking-summary {
+            background: #f1f8e9;
+            border-radius: var(--radius-sm);
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95rem;
+        }
+        .summary-label { color: var(--text-light); font-weight: 500; }
+        .summary-value { font-weight: 700; color: var(--primary-dark); }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text);
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #e0e8e0;
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            background: #fafcfa;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+        }
+
+        .form-group textarea { resize: vertical; min-height: 70px; }
+
+        .btn {
+            padding: 14px 20px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(46,125,50,0.3); }
+
+        .btn-secondary {
+            background: #e8f5e9;
+            color: var(--primary);
+            margin-top: 10px;
+        }
+        .btn-secondary:hover { background: #c8e6c9; }
+
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 20px 0;
+        }
+        .success-message.active { display: block; animation: slideUp 0.4s ease; }
+        .success-icon { font-size: 3.5rem; margin-bottom: 10px; }
+        .success-message h3 { font-size: 1.3rem; color: var(--primary); margin-bottom: 15px; }
+
+        .success-details {
+            background: #f1f8e9;
+            border-radius: var(--radius-sm);
+            padding: 15px;
+            margin: 15px 0 25px;
+            text-align: left;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #c8e6c9;
+        }
+        .detail-row:last-child { border-bottom: none; }
+
+        /* ===== MY BOOKINGS ===== */
+        .my-bookings { margin-top: 20px; }
+        .bookings-list { display: flex; flex-direction: column; gap: 12px; }
+
+        .booking-item {
+            background: var(--white);
+            border-radius: var(--radius-sm);
+            padding: 16px 18px;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .booking-info { display: flex; flex-direction: column; gap: 4px; }
+        .booking-info .b-court { font-weight: 700; font-size: 1rem; color: var(--primary-dark); }
+        .booking-info .b-details { font-size: 0.85rem; color: var(--text-light); }
+
+        .btn-cancel {
+            background: #ffebee;
+            color: var(--booked);
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-cancel:hover { background: var(--booked); color: white; }
+
+        .no-bookings {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-light);
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+        .empty-icon { font-size: 2.5rem; margin-bottom: 10px; }
+
+        /* ===== FOOTER ===== */
+        footer {
+            background: var(--primary-dark);
+            color: rgba(255,255,255,0.8);
+            text-align: center;
+            padding: 20px;
+            font-size: 0.85rem;
+            margin-top: auto;
+        }
+
+        /* ===== TOAST ===== */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #333;
+            color: white;
+            padding: 14px 24px;
+            border-radius: 50px;
+            box-shadow: var(--shadow-lg);
+            font-weight: 600;
+            font-size: 0.95rem;
+            z-index: 2000;
+            opacity: 0;
+            transition: all 0.4s ease;
+            white-space: nowrap;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 480px) {
+            .logo h1 { font-size: 1.4rem; }
+            .header-info { gap: 8px; }
+            .header-info-item { font-size: 0.8rem; padding: 6px 12px; }
+            .slots-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+            .time-slot { padding: 12px 6px; }
+            .time-slot .slot-time { font-size: 0.95rem; }
+            .week-nav-btn { padding: 8px 12px; font-size: 0.85rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-content">
+        <div class="logo">
+            <span class="logo-icon">🎾</span>
+            <h1>Теннисный корт КП</h1>
+        </div>
+        <p class="header-subtitle">Бесплатная онлайн-запись для резидентов посёлка.<br>Играйте с удовольствием!</p>
+        <div class="header-info">
+            <div class="header-info-item">🕐 9:00 — 21:00</div>
+            <div class="header-info-item">🆓 Бесплатно</div>
+            <div class="header-info-item">📍 Центральная аллея</div>
+        </div>
+    </div>
+</header>
+
+<main>
+    <div class="section-title">📅 Выберите дату и время</div>
+
+    <div class="legend">
+        <div class="legend-item"><span class="legend-dot available"></span> Свободно</div>
+        <div class="legend-item"><span class="legend-dot selected"></span> Выбрано</div>
+        <div class="legend-item"><span class="legend-dot booked"></span> Занято соседом</div>
+        <div class="legend-item"><span class="legend-dot past"></span> Прошло</div>
+    </div>
+
+    <div class="week-nav">
+        <button class="week-nav-btn" id="prevWeekBtn" onclick="changeWeek(-1)">← Назад</button>
+        <span class="week-label" id="weekLabel"></span>
+        <button class="week-nav-btn" id="nextWeekBtn" onclick="changeWeek(1)">Вперёд →</button>
+    </div>
+
+    <div class="days-tabs" id="daysTabs"></div>
+
+    <div class="court-card">
+        <div class="court-header">
+            <h3>🏟 Наш корт</h3>
+            <span class="court-type">Открытый, хард</span>
+        </div>
+        <div class="court-body">
+            <div class="slots-grid" id="slotsGrid"></div>
+        </div>
+    </div>
+
+    <div class="my-bookings">
+        <div class="section-title">📋 Мои записи</div>
+        <div class="bookings-list" id="bookingsList"></div>
+    </div>
+</main>
+
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <div class="modal-header">
+            <h2>📝 Запись на корт</h2>
+            <button class="modal-close" onclick="closeModal()">✕</button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<footer>
+    <p>© 2026 Теннисный корт нашего посёлка. Только для резидентов.</p>
+</footer>
+
+<script>
+    // ===== STATE =====
+    let currentWeekStart = getMonday(new Date());
+    let selectedDay = new Date();
+    let selectedSlot = null;
+    
+    // Загружаем данные из localStorage
+    let bookings = JSON.parse(localStorage.getItem('kp_tennis_bookings') || '[]');
+    let courtData = JSON.parse(localStorage.getItem('kp_tennis_court') || '{}');
+
+    const COURT_ID = 'main_court';
+    const HOURS = [];
+    for (let h = 9; h < 21; h++) HOURS.push(h);
+
+    const DAY_NAMES = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+    const FULL_DAY_NAMES = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
+    const MONTH_NAMES = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
+
+    // ===== HELPERS =====
+    function getMonday(d) {
+        const date = new Date(d);
+        const day = date.getDay();
+        const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+        date.setDate(diff);
+        date.setHours(0, 0, 0, 0);
+        return date;
+    }
+
+    function formatDate(d) {
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+
+    function isSameDay(d1, d2) {
+        return d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate();
+    }
+
+    function isPast(date, hour) {
+        const now = new Date();
+        const slotDate = new Date(date);
+        slotDate.setHours(hour, 0, 0, 0);
+        return slotDate < now;
+    }
+
+    function isToday(date) {
+        return isSameDay(date, new Date());
+    }
+
+    function getWeekDates(monday) {
+        const dates = [];
+        for (let i = 0; i < 7; i++) {
+            const d = new Date(monday);
+            d.setDate(monday.getDate() + i);
+            dates.push(d);
+        }
+        return dates;
+    }
+
+    function formatWeekLabel(monday) {
+        const dates = getWeekDates(monday);
+        const start = dates[0];
+        const end = dates[6];
+        if (start.getMonth() === end.getMonth()) {
+            return `${start.getDate()} — ${end.getDate()} ${MONTH_NAMES[start.getMonth()]} ${start.getFullYear()}`;
+        }
+        return `${start.getDate()} ${MONTH_NAMES[start.getMonth()]} — ${end.getDate()} ${MONTH_NAMES[end.getMonth()]} ${end.getFullYear()}`;
+    }
+
+    function isSlotBooked(date, hour) {
+        const key = `${COURT_ID}_${formatDate(date)}_${hour}`;
+        return courtData[key] === true;
+    }
+
+    // ===== ACTIONS =====
+    function changeWeek(direction) {
+        currentWeekStart.setDate(currentWeekStart.getDate() + direction * 7);
+        const dates = getWeekDates(currentWeekStart);
+        const inRange = dates.some(d => isSameDay(d, selectedDay));
+        if (!inRange) selectedDay = new Date(dates[0]);
+        selectedSlot = null;
+        renderAll();
+    }
+
+    function selectDay(index) {
+        const dates = getWeekDates(currentWeekStart);
+        selectedDay = new Date(dates[index]);
+        selectedSlot = null;
+        renderAll();
+    }
+
+    function selectSlot(hour) {
+        if (selectedSlot && selectedSlot.hour === hour) {
+            openBookingModal();
+        } else {
+            selectedSlot = { hour, date: new Date(selectedDay) };
+            renderSlots();
+            openBookingModal();
+        }
+    }
+
+    function bookSlot(hour, name, house, phone, comment) {
+        const key = `${COURT_ID}_${formatDate(selectedDay)}_${hour}`;
+        courtData[key] = true;
+        localStorage.setItem('kp_tennis_court', JSON.stringify(courtData));
+
+        const booking = {
+            id: Date.now(),
+            courtName: 'Наш корт',
+            date: formatDate(selectedDay),
+            dateStr: `${selectedDay.getDate()} ${MONTH_NAMES[selectedDay.getMonth()]} ${FULL_DAY_NAMES[selectedDay.getDay()]}`,
+            hour,
+            timeStr: `${String(hour).padStart(2,'0')}:00 — ${String(hour+1).padStart(2,'0')}:00`,
+            name, house, phone, comment,
+            createdAt: new Date().toISOString()
+        };
+
+        bookings.push(booking);
+        localStorage.setItem('kp_tennis_bookings', JSON.stringify(bookings));
+        return booking;
+    }
+
+    function cancelBooking(bookingId) {
+        if (!confirm('Отменить эту запись?')) return;
+        const booking = bookings.find(b => b.id === bookingId);
+        if (booking) {
+            const key = `${COURT_ID}_${booking.date}_${booking.hour}`;
+            delete courtData[key];
+            localStorage.setItem('kp_tennis_court', JSON.stringify(courtData));
+            bookings = bookings.filter(b => b.id !== bookingId);
+            localStorage.setItem('kp_tennis_bookings', JSON.stringify(bookings));
+            renderAll();
+            showToast('✅ Запись отменена');
+        }
+    }
+
+    // ===== RENDER =====
+    function renderAll() {
+        renderDaysTabs();
+        renderSlots();
+        renderBookings();
+        document.getElementById('weekLabel').textContent = formatWeekLabel(currentWeekStart);
+        
+        // Disable prev week button if it's the current week
+        const now = new Date();
+        const thisWeekMonday = getMonday(now);
+        document.getElementById('prevWeekBtn').disabled = (currentWeekStart.getTime() === thisWeekMonday.getTime());
+    }
+
+    function renderDaysTabs() {
+        const container = document.getElementById('daysTabs');
+        const dates = getWeekDates(currentWeekStart);
+
+        container.innerHTML = dates.map((date, i) => {
+            const isActive = isSameDay(date, selectedDay);
+            const isTodayDate = isToday(date);
+            const classes = ['day-tab'];
+            if (isActive) classes.push('active');
+            if (isTodayDate) classes.push('today');
+
+            return `
+                <div class="${classes.join(' ')}" onclick="selectDay(${i})">
+                    <div class="day-name">${DAY_NAMES[date.getDay()]}</div>
+                    <div class="day-num">${date.getDate()}</div>
+                    <div class="day-month">${MONTH_NAMES[date.getMonth()]}</div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function renderSlots() {
+        const container = document.getElementById('slotsGrid');
+
+        container.innerHTML = HOURS.map(hour => {
+            const past = isPast(selectedDay, hour);
+            const booked = !past && isSlotBooked(selectedDay, hour);
+            const selected = selectedSlot && selectedSlot.hour === hour && isSameDay(selectedSlot.date, selectedDay);
+
+            let classes = 'time-slot';
+            if (past) classes += ' past';
+            else if (booked) classes += ' booked';
+            if (selected) classes += ' selected';
+
+            const status = past ? 'Прошло' : booked ? 'Занято' : selected ? 'Выбрано' : 'Свободно';
+
+            return `
+                <div class="${classes}" onclick="${!past && !booked ? `selectSlot(${hour})` : ''}">
+                    <div class="slot-time">${String(hour).padStart(2,'0')}:00</div>
+                    <div class="slot-status">${status}</div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function renderBookings() {
+        const container = document.getElementById('bookingsList');
+        // Фильтруем только будущие или сегодняшние записи для отображения в "Моих записях"
+        // Но для простоты покажем все, отсортировав по дате
+        const sorted = [...bookings].sort((a, b) => b.id - a.id);
+
+        if (sorted.length === 0) {
+            container.innerHTML = `
+                <div class="no-bookings">
+                    <div class="empty-icon">📭</div>
+                    <p>У вас пока нет записей.<br>Выберите свободное время выше!</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = sorted.map(b => `
+            <div class="booking-item">
+                <div class="booking-info">
+                    <span class="b-court">🏟 ${b.courtName}</span>
+                    <span class="b-details">📅 ${b.dateStr} | 🕐 ${b.timeStr}</span>
+                    <span class="b-details">🏡 Дом ${b.house} | 👤 ${b.name}</span>
+                </div>
+                <div class="booking-actions">
+                    <button class="btn-cancel" onclick="cancelBooking(${b.id})">Отменить</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // ===== MODAL =====
+    function openBookingModal() {
+        if (!selectedSlot) return;
+        const hour = selectedSlot.hour;
+
+        const modalBody = document.getElementById('modalBody');
+        modalBody.innerHTML = `
+            <div class="booking-summary">
+                <div class="summary-row">
+                    <span class="summary-label">Корт:</span>
+                    <span class="summary-value">Наш корт</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Дата:</span>
+                    <span class="summary-value">${selectedDay.getDate()} ${MONTH_NAMES[selectedDay.getMonth()]} ${FULL_DAY_NAMES[selectedDay.getDay()]}</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Время:</span>
+                    <span class="summary-value">${String(hour).padStart(2,'0')}:00 — ${String(hour+1).padStart(2,'0')}:00</span>
+                </div>
+            </div>
+
+            <form id="bookingForm" onsubmit="submitBooking(event)">
+                <div class="form-group">
+                    <label>👤 Имя и Фамилия *</label>
+                    <input type="text" id="clientName" placeholder="Иван Иванов" required>
+                </div>
+                <div class="form-group">
+                    <label>🏡 Номер дома / участка *</label>
+                    <input type="text" id="clientHouse" placeholder="Например: 15 или 15А" required>
+                </div>
+                <div class="form-group">
+                    <label>📞 Телефон *</label>
+                    <input type="tel" id="clientPhone" placeholder="+7 (___) ___-__-__" required>
+                </div>
+                <div class="form-group">
+                    <label>📝 Комментарий (необязательно)</label>
+                    <textarea id="clientComment" placeholder="Количество игроков, есть ли свои мячи и т.д."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">✅ Записаться</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">Отмена</button>
+            </form>
+
+            <div class="success-message" id="successMessage">
+                <div class="success-icon">🎉</div>
+                <h3>Вы записаны!</h3>
+                <div class="success-details" id="successDetails"></div>
+                <button class="btn btn-primary" onclick="closeModal()">Отлично</button>
+            </div>
+        `;
+
+        document.getElementById('modalOverlay').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        document.getElementById('modalOverlay').classList.remove('active');
+        document.body.style.overflow = '';
+        selectedSlot = null;
+        renderSlots();
+    }
+
+    function submitBooking(e) {
+        e.preventDefault();
+        const name = document.getElementById('clientName').value.trim();
+        const house = document.getElementById('clientHouse').value.trim();
+        const phone = document.getElementById('clientPhone').value.trim();
+        const comment = document.getElementById('clientComment').value.trim();
+
+        if (!name || !house || !phone) {
+            showToast('⚠️ Заполните обязательные поля');
+            return;
+        }
+
+        const booking = bookSlot(selectedSlot.hour, name, house, phone, comment);
+
+        document.getElementById('bookingForm').style.display = 'none';
+        document.querySelector('.booking-summary').style.display = 'none';
+
+        const successMsg = document.getElementById('successMessage');
+        successMsg.classList.add('active');
+
+        document.getElementById('successDetails').innerHTML = `
+            <div class="detail-row"><span>Дата:</span><strong>${booking.dateStr}</strong></div>
+            <div class="detail-row"><span>Время:</span><strong>${booking.timeStr}</strong></div>
+            <div class="detail-row"><span>Дом:</span><strong>${booking.house}</strong></div>
+        `;
+
+        renderBookings();
+        renderSlots();
+    }
+
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // Маска телефона
+    document.addEventListener('input', function(e) {
+        if (e.target.id === 'clientPhone') {
+            let val = e.target.value.replace(/\D/g, '');
+            if (val.length > 0) {
+                if (val[0] === '8') val = '7' + val.slice(1);
+                if (val[0] !== '7') val = '7' + val;
+            }
+            let f = '';
+            if (val.length > 0) f = '+7';
+            if (val.length > 1) f += ' (' + val.slice(1, 4);
+            if (val.length > 4) f += ') ' + val.slice(4, 7);
+            if (val.length > 7) f += '-' + val.slice(7, 9);
+            if (val.length > 9) f += '-' + val.slice(9, 11);
+            e.target.value = f;
+        }
+    });
+
+    document.getElementById('modalOverlay').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+
+    // Инициализация
+    renderAll();
+</script>
+
+</body>
+</html>
